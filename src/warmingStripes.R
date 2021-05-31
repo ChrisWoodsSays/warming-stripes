@@ -11,7 +11,8 @@ temps <- temp_dyce %>%
   rename(temp = metANN) %>%
   mutate(temp = na_if(temp, 999.9),
          date = ymd(str_c(YEAR, "01-01", sep = "-"))) %>%
-  select(date, temp)
+  select(date, temp) %>%
+  filter(year(date) >= 1881)
 
 theme_strip <- theme_minimal()+
   theme(axis.text.y = element_blank(),
@@ -58,7 +59,7 @@ rasterImg <- grid::rasterGrob(circlularImage, interpolate = FALSE)
 col_strip <- brewer.pal(11, "RdBu")
 
 # Create Main Plot
-ggplot(temps,
+main <- ggplot(temps,
        aes(x = date, y = 1, fill = temp))+
   geom_tile()+
   scale_x_date(date_breaks = "10 years",
@@ -67,10 +68,13 @@ ggplot(temps,
   scale_y_continuous(expand = c(0, 0))+
   scale_fill_gradientn(colors = rev(col_strip))+
   guides(fill = guide_colorbar(barwidth = 1))+
-  labs(title = "Dyce, UK 1880-2021",
+  labs(title = "Dyce, UK 1881-2021",
        caption = "Data: GISS Surface Temperature Analysis")+
   theme_strip + 
   theme(legend.position = "none")
+
+ggsave("UK Warming Stripes.jpg", plot = main, path = here::here("output"),device = "jpg", dpi=320, width = 19.2, height = 10.8, units = "cm")
+
 
 # Create Circular Version
 ring <- ggplot(temps, aes(ymax=5, ymin=3.7, xmax=date + years(1), xmin=date, fill=temp)) +
@@ -90,3 +94,4 @@ g <-ggdraw() +
 g
 
 ggsave("Business Analyst (Data).jpg", plot = g, path = here::here("output"),device = "jpg", dpi=320, width = 10, height = 10, units = "cm")
+
